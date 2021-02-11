@@ -4,12 +4,12 @@ import htcondor
 import os, sys, glob, shutil
 from optparse import OptionParser
 
-def job(proxy, cdir, s, t, p, v, batch, fsh):
+def job(cdir, s, t, p, v, batch, fsh):
     
     j = "#!/bin/bash\n\n"
     
-    j += "export X509_USER_PROXY="+proxy+"\n"
-    
+    j += "export X509_USER_PROXY="+options.proxy+"\n"
+
     j += "echo \"Start: $(/bin/date)\"\n"
     j += "echo \"User: $(/usr/bin/id)\"\n"
     j += "echo \"Node: $(/bin/hostname)\"\n"
@@ -45,6 +45,7 @@ def main(argv = None):
     
     parser.add_option("--list", type=str, default='list.txt', help="List with names of the samples [default: %default]")
     parser.add_option("--filter", type=str, default='all', help="Filter to apply (all, 1lep, 2lep, 3lep) [default: %default]")
+    parser.add_option("--proxy", type=str, default='/user/kskovpen/proxy/x509up_u20657', help="Proxy location [default: %default]")
     parser.add_option("--split", type=int, default=10, help="Number of processed files per job [default: %default]")
     parser.add_option("--input", type=str, default='/pnfs/iihe/cms/store/user/kskovpen/heavyNeutrinoMoriond21', help="Input directory [default: %default]")
     parser.add_option("--output", type=str, default='/pnfs/iihe/cms/store/user/kskovpen/heavyNeutrinoMoriond21_PP', help="Output directory [default: %default]")
@@ -62,8 +63,6 @@ if __name__ == '__main__':
     options = main()
 
     cdir = os.getcwd()
-    
-    proxy = '/user/kskovpen/proxy/x509up_u20657'
     
     samples = {}
     with open(options.list) as fr:
@@ -102,7 +101,7 @@ if __name__ == '__main__':
                     for ib, b in enumerate(batches):
 
                         fout = ('jobs/'+s+'_'+t+'_'+p+'_'+os.path.basename(b[0])+'_'+str(ib)).replace('.root', '')
-                        job(proxy, cdir, s, t, p, v, b, fout+'.sh')
+                        job(cdir, s, t, p, v, b, fout+'.sh')
 
                         js = htcondor.Submit({\
                         "executable": fout+'.sh', \
