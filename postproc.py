@@ -30,6 +30,7 @@ def job(cdir, s, t, p, v, batch, fsh):
         
         if bool(v): j += "cp "+fin+" "+fout+"\n"
         else: j += "python applySkim.py "+fin+" "+fout+" "+options.filter+"\n"
+        if options.clean: j += "rm -rf "+fin+"\n"
 
     with open(fsh, 'w') as f:
         f.write(j)
@@ -48,7 +49,8 @@ def main(argv = None):
     parser.add_option("--proxy", type=str, default='/user/kskovpen/proxy/x509up_u20657', help="Proxy location [default: %default]")
     parser.add_option("--split", type=int, default=10, help="Number of processed files per job [default: %default]")
     parser.add_option("--input", type=str, default='/pnfs/iihe/cms/store/user/kskovpen/heavyNeutrinoMoriond21', help="Input directory [default: %default]")
-    parser.add_option("--output", type=str, default='/pnfs/iihe/cms/store/user/kskovpen/heavyNeutrinoMoriond21_PP', help="Output directory [default: %default]")
+    parser.add_option("--output", type=str, default='/pnfs/iihe/cms/store/user/kskovpen/heavyNeutrinoMoriond21Skim', help="Output directory [default: %default]")
+    parser.add_option("--clean", action='store_true', help="Remove all input files once the processing is done [default: %default]")
     
     (options, args) = parser.parse_args(sys.argv[1:])
     
@@ -67,6 +69,7 @@ if __name__ == '__main__':
     samples = {}
     with open(options.list) as fr:
         for l in fr.readlines():
+            if '#' in l: continue
             name = l.split(' ')[0]
             copy = int(l.split(' ')[1])
             samples[name] = copy
